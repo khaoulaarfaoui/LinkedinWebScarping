@@ -7,6 +7,10 @@ import csv
 from parsel import Selector
 
 # Function call extracting title and linkedin profile iteratively
+companies = []
+locations = []
+names = []
+jobs = []
 def find_profiles():
     for r in result_div:
         # Checks if each element is present, else, raise exception
@@ -21,12 +25,25 @@ def find_profiles():
             print('oui')
             sleep(5)
             sel = Selector(text=driver.page_source)
-            header = sel.xpath("//span[@class='text-align-left ml2 t-14 t-black t-bold full-width lt-line-clamp lt-line-clamp--multi-line ember-view']/text()").extract()
+            header0 = sel.xpath("//div[@class='flex-1 mr5']/ul/li[1]/text()").extract()
+
+            full_name = header0[0].strip()
+            print(full_name)
+            location = header0[1].strip()
+            print(location)
+            header1 = sel.xpath("//div[@class='flex-1 mr5']/h2/text()").extract()
+            job_title = header1[0].strip()
+            header = sel.xpath(
+                "//span[@class='text-align-left ml2 t-14 t-black t-bold full-width lt-line-clamp lt-line-clamp--multi-line ember-view']/text()").extract()
             college = header[1].split('\n\n')[0]
-            company_one = header[0]
             print(college)
             if college:
                 college = college.strip()
+            company_one = header[0]
+            print(company_one)
+            if company_one:
+                company_one = company_one.strip()
+
             title = None
             title = r.find('h3')
 
@@ -46,8 +63,11 @@ def find_profiles():
                 titles.append(title)
                 descriptions.append(description)
                 colleges.append(college)
+                companies.append(company_one)
+                names.append(full_name)
+                locations.append(location)
+                jobs.append(job_title)
 
-                print(colleges)
         # Next loop if one element is not present
         except Exception as e:
             print(e)
@@ -57,9 +77,8 @@ def find_profiles():
 # This function iteratively clicks on the "Next" button at the bottom right of the search page.
 def profiles_loop():
     find_profiles()
-
-    next_button = driver.find_element_by_xpath('//*[@id="pnnext"]')
-    next_button.click()
+    #next_button = driver.find_element_by_xpath('//*[@id="pnnext"]')
+    #next_button.click()
 
 
 def repeat_fun(times, f):
@@ -116,32 +135,14 @@ colleges = []
 # Function call x10 of function profiles_loop; you can change the number to as many pages of search as you like.
 repeat_fun(1, profiles_loop)
 
-print(titles)
-print(links)
 
-# Separates out just the First/Last Names for the titles variable
-name = []
-job = []
-company = []
-for i in titles:
-    slots = i.split(' - ')
-    print(len(slots))
-    if len(slots) == 3:
-        name.append(i.split('-', 10)[0])
-        job.append(i.split('-', 10)[1])
-        company.append(i.split('-', 10)[2])
-    elif len(slots) != 3:
-        name.append(i.split('-', 10)[0])
-        job.append(i.split('-', 10)[1])
-        company.append(None)
-# The function below stores scraped data into a .csv file
 from itertools import zip_longest
 
 # Load titles and links data into csv
-d = [name, links, job, company, colleges]
+d = [names, links, jobs, companies, colleges, locations]
 export_data = zip_longest(*d, fillvalue='')
 with open('results_file.csv', 'w', encoding="ISO-8859-1", newline='') as myfile:
     wr = csv.writer(myfile)
-    wr.writerow(("Titles", "Links", "Current_Job", "Job", "college"))
+    wr.writerow(("Names", "Links", "Title", "Company", "College", "Locations"))
     wr.writerows(export_data)
 myfile.close()
