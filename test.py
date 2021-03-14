@@ -1,5 +1,5 @@
-import numpy as np
-
+# this file is when you want to extract data from google search result
+# without getting inside every linkedin profile
 titles01 = ['Paul Garner HAMADI - Freelance Python Developer - Depop | LinkedIn',
             'Rob Young - Python Developer',
             'Paul Garner - Freelance Python Developer - Depop | LinkedIn']
